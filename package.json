@@ -1,0 +1,17 @@
+{
+  "name": "currency-exchange",
+  "version": "1.0.0",
+  "description": "Exchange API which can help exchange and add currecny",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dmytro Kupets",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
