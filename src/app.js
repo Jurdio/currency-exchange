@@ -23,15 +23,6 @@ app.use('/api', currencyRoutes);
 
 app.use('/api', exchangeRateRoutes);
 
-/**
- * @swagger
- * /currencies:
- *   get:
- *     summary: Retrieve a list of currencies
- *     responses:
- *       200:
- *         description: A list of currencies.
- */
 app.get('/currencies', (req, res, next) => { 
     res.json({ message: 'Currencies' });
    }
