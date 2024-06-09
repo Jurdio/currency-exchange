@@ -155,48 +155,57 @@ exports.getExchange = (req, res, next) => {
     const to = req.query.to;
     const amount = Number(req.query.amount);
 
-    ExchangeRate.findOne({ baseCurrencyCode: from, targetCurrencyCode: to })
-        .then(exchangeRate => {
-            if (exchangeRate) {
-                return exchangeRate;
-            } else {
-                return ExchangeRate.findOne({ baseCurrencyCode: to, targetCurrencyCode: from })
-                    .then(exchangeRate => {
-                        if (exchangeRate) {
-                            exchangeRate.rate = 1 / exchangeRate.rate;
-                            return exchangeRate;
-                        } else {
-                            return Promise.all([
-                                ExchangeRate.findOne({ baseCurrencyCode: 'USD', targetCurrencyCode: from }),
-                                ExchangeRate.findOne({ baseCurrencyCode: 'USD', targetCurrencyCode: to })
-                            ]).then(([fromRate, toRate]) => {
-                                if (fromRate && toRate) {
-                                    return { rate: toRate.rate / fromRate.rate };
+    Currency.findOne({ where: { code: from }})
+        .then(baseCurrency => {
+            return Currency.findOne({ where: { code: to }})
+                .then(targetCurrency => {
+                    return [baseCurrency, targetCurrency];
+                });
+        })
+        .then(([baseCurrency, targetCurrency]) => {
+            return ExchangeRate.findOne({ where: { baseCurrencyId: baseCurrency.id, targetCurrencyId: targetCurrency.id }})
+                .then(exchangeRate => {
+                    if (exchangeRate) {
+                        return [baseCurrency, targetCurrency, exchangeRate];
+                    } else {
+                        return ExchangeRate.findOne({ where: { baseCurrencyId: targetCurrency.id, targetCurrencyId: baseCurrency.id }})
+                            .then(exchangeRate => {
+                                if (exchangeRate) {
+                                    return [baseCurrency, targetCurrency, { rate: 1 / exchangeRate.rate }];
                                 } else {
-                                    throw new Error('Exchange rate not found');
+                                    return Promise.all([
+                                        ExchangeRate.findOne({ where: { baseCurrencyId: 'USD', targetCurrencyId: baseCurrency.id }}),
+                                        ExchangeRate.findOne({ where: { baseCurrencyId: 'USD', targetCurrencyId: targetCurrency.id }})
+                                    ]).then(([usdBaseExchangeRate, usdTargetExchangeRate]) => {
+                                        return [baseCurrency, targetCurrency, { rate: usdTargetExchangeRate.rate / usdBaseExchangeRate.rate }];
+                                    });
                                 }
                             });
-                        }
-                    });
-            }
-        })
-        .then(exchangeRate => {
-            return Promise.all([
-                Currency.findOne({ code: from }),
-                Currency.findOne({ code: to })
-            ]).then(([baseCurrency, targetCurrency]) => {
-                const convertedAmount = amount * exchangeRate.rate;
-
-                res.json({
-                    baseCurrency,
-                    targetCurrency,
-                    rate: exchangeRate.rate,
-                    amount,
-                    convertedAmount
+                    }
                 });
+        })
+        .then(([baseCurrency, targetCurrency, exchangeRate]) => {
+            const convertedAmount = amount * exchangeRate.rate;
+
+            res.json({
+                baseCurrency: {
+                    id: baseCurrency.id,
+                    name: baseCurrency.name,
+                    code: baseCurrency.code,
+                    sign: baseCurrency.sign
+                },
+                targetCurrency: {
+                    id: targetCurrency.id,
+                    name: targetCurrency.name,
+                    code: targetCurrency.code,
+                    sign: targetCurrency.sign
+                },
+                rate: exchangeRate.rate,
+                amount,
+                convertedAmount
             });
         })
         .catch(error => {
-            next(error);
+                next(error);
         });
 };
