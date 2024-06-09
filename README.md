@@ -1,6 +1,6 @@
 # Currency Exchange Project
 ## Overview
-This project is a REST API for managing and querying currency exchange rates. It allows you to view and edit lists of currencies and exchange rates, and calculate the conversion of arbitrary amounts from one currency to another.
+This project is a REST API for managing and querying currency exchange rates. It allows you to view and edit lists of currencies and their exchange rates. The API also provides endpoints for calculating the conversion from one currency to another. The project includes a Swagger documentation and a Postman collection for these endpoints.
 
 **Please note that a web interface for this project is not currently provided.**
 
@@ -8,6 +8,18 @@ This project is a REST API for managing and querying currency exchange rates. It
 - **Currency Management:** Add, update, and delete different currencies.
 - **Exchange Rate Management:** Add, update, and delete exchange rates between different currencies.
 - **Currency Conversion:** Calculate the conversion of an arbitrary amount from one currency to another.
+
+
+## Database
+MySQL is used as the database for this project. This allows for the inclusion of a file with pre-filled database tables in the project resources, simplifying deployment.
+
+Currencies Table
+| Column | Type | Comment |
+| --- | --- |
+ID	int	Currency ID, auto-increment, primary key
+Code	Varchar	Currency code
+FullName	Varchar	Full name of the currency
+Sign	Varchar	Currency symbol
 
 ## API Endpoints
 - `GET /currencies`: Get a list of all currencies.
@@ -28,8 +40,14 @@ git clone https://github.com/yourusername/currency-exchange.git
 ```bash 
 cd currency-exchange
 ```
-3. Install dependencies: ```npm install```
-4. Start the server: `npm start`
+3. Install dependencies: 
+```bash 
+npm install
+```
+4. Start the server: 
+```bash 
+npm start
+```
 
-## Contributing
+# Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
