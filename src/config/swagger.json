@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Currency API",
+    "description": "API for managing currencies",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local server"
+    },
+    {
+      "url": "https://localhost:3000/api",
+      "description": "Secure local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Currencies",
+      "description": "API for currencies in the system"
+    }
+  ],
+  "paths": {
+    "/currencies": {
+      "get": {
+        "summary": "Get all currencies",
+        "tags": [
+          "Currencies"
+        ],
+        "description": "Get all currencies in the system",
+        "responses": {
+          "200": {
+            "description": "A list of currencies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Currency"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Currency": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

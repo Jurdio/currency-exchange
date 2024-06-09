@@ -1,13 +1,35 @@
-const path = require('path');
-
 const express = require('express');
-const bodeParser = require('body-parser');
+const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./config/swagger.json');
 
 const sequelize = require('./util/database');
+const currencyRoutes = require('./router/currency');
+const exchangeRateRoutes = require('./router/exchangeRate');
 
 const app = express();
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use(bodeParser.json());
+
+app.use(bodyParser.urlencoded({extended: false}));
+
+app.use('/api', currencyRoutes);
+
+app.use('/api', exchangeRateRoutes);
+
+/**
+ * @swagger
+ * /currencies:
+ *   get:
+ *     summary: Retrieve a list of currencies
+ *     responses:
+ *       200:
+ *         description: A list of currencies.
+ */
+app.get('/currencies', (req, res, next) => { 
+    res.json({ message: 'Currencies' });
+   }
+);
 
 sequelize
     .sync()
@@ -19,4 +41,3 @@ sequelize
     .catch(err => {
         console.log(err);
     });
-
