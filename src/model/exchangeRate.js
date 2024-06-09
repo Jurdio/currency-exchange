@@ -21,13 +21,6 @@ const ExchangeRate = sequelize.define('exchangeRate', {
         type: Sequelize.DECIMAL(10, 6),
         allowNull: false
     }
-}, {
-    indexes: [
-        {
-            unique: true,
-            fields: ['baseCurrencyId', 'targetCurrencyId']
-        }
-    ]
 });
 
 

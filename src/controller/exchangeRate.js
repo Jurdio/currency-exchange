@@ -34,16 +34,23 @@ exports.postExchangeRates = (req, res, next) => {
                         return res.status(404).json({ message: 'Target currency not found' });
                     }
 
-                    return ExchangeRate.create({ baseCurrencyId: baseCurrency.id, targetCurrencyId: targetCurrency.id, rate })
-                        .then(newExchangeRate => {
-                            res.status(201).json({
-                                message: 'Exchange rate created successfully',
-                                exchangeRate: newExchangeRate
-                            });
-                        })
-                        .catch(err => {
-                            console.log(err);
-                            res.status(500).json({ message: 'Database error' });
+                    return ExchangeRate.findOne({ where: { baseCurrencyId: baseCurrency.id, targetCurrencyId: targetCurrency.id } })
+                        .then(existingExchangeRate => {
+                            if (existingExchangeRate) {
+                                return res.status(409).json({ message: 'Exchange rate already exists' });
+                            }
+
+                            return ExchangeRate.create({ baseCurrencyId: baseCurrency.id, targetCurrencyId: targetCurrency.id, rate })
+                                .then(newExchangeRate => {
+                                    res.status(201).json({
+                                        message: 'Exchange rate created successfully',
+                                        exchangeRate: newExchangeRate
+                                    });
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    res.status(500).json({ message: 'Database error' });
+                                });
                         });
                 });
         });

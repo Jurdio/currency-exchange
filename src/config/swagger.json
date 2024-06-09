@@ -48,6 +48,66 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Create a new currency",
+        "tags": [
+          "Currencies"
+        ],
+        "description": "Create a new currency in the system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Currency"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Currency created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/currency/{code}": {
+      "get": {
+        "summary": "Get a specific currency by code",
+        "tags": [
+          "Currencies"
+        ],
+        "description": "Get details about a specific currency by its code",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "description": "Code of the currency",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details about the currency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Currency"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Currency not found"
+          }
+        }
       }
     }
   },
