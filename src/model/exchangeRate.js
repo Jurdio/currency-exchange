@@ -1,5 +1,4 @@
 const Sequelize = require('sequelize');
-
 const sequelize = require('../util/database');
 
 const ExchangeRate = sequelize.define('exchangeRate', {
@@ -22,6 +21,4 @@ const ExchangeRate = sequelize.define('exchangeRate', {
         allowNull: false
     }
 });
-
-
 module.exports = ExchangeRate;

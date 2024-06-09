@@ -107,22 +107,43 @@ exports.getExchangeRatesByCodes = (req, res, next) => {
         });
 };
 exports.updateExchangeRate = (req, res, next) => {
-    const baseCurrencyCode = req.params.baseCurrencyCode;
-    const targetCurrencyCode = req.params.targetCurrencyCode;
+    const currencyPair = req.params.currencyPair;
+    const baseCurrencyCode = currencyPair.slice(0, 3);
+    const targetCurrencyCode = currencyPair.slice(3);
     const rate = req.body.rate;
 
-    ExchangeRate.update({ rate }, { where: { baseCurrencyCode, targetCurrencyCode } })
-        .then(result => {
-            if (result[0] === 0) {
-                return res.status(404).json({ message: 'Exchange rate not found' });
+    if (!rate) {
+        return res.status(400).json({ message: 'Rate is required' });
+    }
+
+    Currency.findOne({ where: { code: baseCurrencyCode } })
+        .then(baseCurrency => {
+            if (!baseCurrency) {
+                return res.status(404).json({ message: 'Base currency not found' });
             }
 
-            res.status(200).json({
-                message: 'Exchange rate updated successfully',
-                baseCurrencyCode: baseCurrencyCode,
-                targetCurrencyCode: targetCurrencyCode,
-                rate: rate
-            });
+            return Currency.findOne({ where: { code: targetCurrencyCode } })
+                .then(targetCurrency => {
+                    if (!targetCurrency) {
+                        return res.status(404).json({ message: 'Target currency not found' });
+                    }
+
+                    return ExchangeRate.findOne({ where: { baseCurrencyId: baseCurrency.id, targetCurrencyId: targetCurrency.id } })
+                        .then(exchangeRate => {
+                            if (!exchangeRate) {
+                                return res.status(404).json({ message: 'Exchange rate not found' });
+                            }
+
+                            exchangeRate.rate = rate;
+                            return exchangeRate.save();
+                        })
+                        .then(updatedExchangeRate => {
+                            res.status(200).json({
+                                message: 'Exchange rate updated successfully',
+                                exchangeRate: updatedExchangeRate
+                            });
+                        });
+                });
         })
         .catch(err => {
             console.log(err);
