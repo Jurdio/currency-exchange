@@ -150,3 +150,53 @@ exports.updateExchangeRate = (req, res, next) => {
             res.status(500).json({ message: 'Database error' });
         });
 };
+exports.getExchange = (req, res, next) => {
+    const from = req.query.from;
+    const to = req.query.to;
+    const amount = Number(req.query.amount);
+
+    ExchangeRate.findOne({ baseCurrencyCode: from, targetCurrencyCode: to })
+        .then(exchangeRate => {
+            if (exchangeRate) {
+                return exchangeRate;
+            } else {
+                return ExchangeRate.findOne({ baseCurrencyCode: to, targetCurrencyCode: from })
+                    .then(exchangeRate => {
+                        if (exchangeRate) {
+                            exchangeRate.rate = 1 / exchangeRate.rate;
+                            return exchangeRate;
+                        } else {
+                            return Promise.all([
+                                ExchangeRate.findOne({ baseCurrencyCode: 'USD', targetCurrencyCode: from }),
+                                ExchangeRate.findOne({ baseCurrencyCode: 'USD', targetCurrencyCode: to })
+                            ]).then(([fromRate, toRate]) => {
+                                if (fromRate && toRate) {
+                                    return { rate: toRate.rate / fromRate.rate };
+                                } else {
+                                    throw new Error('Exchange rate not found');
+                                }
+                            });
+                        }
+                    });
+            }
+        })
+        .then(exchangeRate => {
+            return Promise.all([
+                Currency.findOne({ code: from }),
+                Currency.findOne({ code: to })
+            ]).then(([baseCurrency, targetCurrency]) => {
+                const convertedAmount = amount * exchangeRate.rate;
+
+                res.json({
+                    baseCurrency,
+                    targetCurrency,
+                    rate: exchangeRate.rate,
+                    amount,
+                    convertedAmount
+                });
+            });
+        })
+        .catch(error => {
+            next(error);
+        });
+};
